@@ -18,6 +18,9 @@
 - `BaseRepository` methods always include `userId` as a parameter — no exceptions
 - `username` must match `^[a-z0-9_-]+$`, 3–30 chars
 - TypeScript strict mode on
+- Theme data (colors, fonts, layout) is **always separate** from content resources — never inline on UserEntity
+- Only one theme can be `isActive = true` per user at a time — enforced in `SetActiveThemeUseCase`
+- Active theme is included in every public portfolio response (`GET /public/u/:username`)
 
 ## Branch Strategy
 
@@ -26,8 +29,8 @@ main          ← stable, production-ready (PR from develop)
 develop       ← integration branch (PR target for all features)
   feature/setup-projet      ← Tasks 1-4 (init + entities + shared infra)
   feature/backend-auth      ← Tasks 5-6 (register/login + profile)
-  feature/backend-crud      ← Tasks 7-9 (all CRUD resources)
-  feature/backend-public    ← Tasks 10-11 (public routes + server)
+  feature/backend-crud      ← Tasks 7-10 (all CRUD resources + themes)
+  feature/backend-public    ← Tasks 11-12 (public routes + server)
 ```
 
 Each feature branch opens a PR → `develop`. No direct commits to `main` or `develop`.
@@ -61,6 +64,7 @@ backEnd/
         EducationEntity.ts
         NewsEntity.ts
         SocialLinkEntity.ts
+        ThemeEntity.ts
       repositories/
         BaseRepository.ts
         UserRepository.ts
@@ -70,6 +74,7 @@ backEnd/
         EducationRepository.ts
         NewsRepository.ts
         SocialLinkRepository.ts
+        ThemeRepository.ts
       middlewares/
         authMiddleware.ts
         validate.ts
@@ -83,6 +88,7 @@ backEnd/
         EducationController.ts
         NewsController.ts
         SocialLinkController.ts
+        ThemeController.ts
         PublicController.ts
       routes/
         auth.routes.ts
@@ -93,6 +99,7 @@ backEnd/
         education.routes.ts
         news.routes.ts
         social-link.routes.ts
+        theme.routes.ts
         public.routes.ts
         index.ts
       dto/
@@ -123,6 +130,13 @@ backEnd/
       education/     (same 5)
       news/          (same 5)
       social-link/   (same 5)
+      theme/
+        GetThemesUseCase.ts
+        GetActiveThemeUseCase.ts
+        CreateThemeUseCase.ts
+        UpdateThemeUseCase.ts
+        DeleteThemeUseCase.ts
+        SetActiveThemeUseCase.ts
       public/
         GetPublicPortfolioUseCase.ts
     server.ts
@@ -2479,7 +2493,338 @@ git push -u origin feature/backend-crud
 
 ---
 
-## Task 9: Public routes
+## Task 9: Themes CRUD + SetActive
+
+**Branch:** `feature/backend-crud` (continue)
+
+**Files:**
+- Create: `backEnd/src/infrastructure/entities/ThemeEntity.ts`
+- Create: `backEnd/src/infrastructure/dto/theme.dto.ts`
+- Create: `backEnd/src/infrastructure/repositories/ThemeRepository.ts`
+- Create: `backEnd/src/use-cases/theme/GetThemesUseCase.ts`
+- Create: `backEnd/src/use-cases/theme/GetActiveThemeUseCase.ts`
+- Create: `backEnd/src/use-cases/theme/CreateThemeUseCase.ts`
+- Create: `backEnd/src/use-cases/theme/UpdateThemeUseCase.ts`
+- Create: `backEnd/src/use-cases/theme/DeleteThemeUseCase.ts`
+- Create: `backEnd/src/use-cases/theme/SetActiveThemeUseCase.ts`
+- Create: `backEnd/src/infrastructure/controllers/ThemeController.ts`
+- Create: `backEnd/src/infrastructure/routes/theme.routes.ts`
+- Modify: `backEnd/src/infrastructure/database/data-source.ts` — add ThemeEntity to entities array
+
+**Interfaces:**
+- Produces: `GET /api/themes` → all themes for user
+- Produces: `POST /api/themes` → create theme
+- Produces: `GET /api/themes/active` → current active theme
+- Produces: `PUT /api/themes/:id` → update theme
+- Produces: `DELETE /api/themes/:id` → delete theme
+- Produces: `PATCH /api/themes/:id/activate` → set active (deactivates others)
+- Consumed by Task 10 (public portfolio includes active theme)
+- NOTE: `ThemeEntity` does NOT extend `BaseContentEntity` — it has its own shape with `isActive`
+
+- [ ] **Step 1: Create `ThemeEntity.ts`**
+
+```typescript
+// backEnd/src/infrastructure/entities/ThemeEntity.ts
+import {
+  Entity, PrimaryGeneratedColumn, Column,
+  CreateDateColumn, UpdateDateColumn,
+  ManyToOne, JoinColumn,
+} from 'typeorm';
+import { UserEntity } from './UserEntity';
+
+@Entity('themes')
+export class ThemeEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userId: number;
+
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: UserEntity;
+
+  @Column({ length: 100 })
+  name: string;
+
+  @Column({ default: false })
+  isActive: boolean;
+
+  @Column({ length: 7, default: '#1d4ed8' })
+  primaryColor: string;
+
+  @Column({ length: 7, default: '#0a1128' })
+  secondaryColor: string;
+
+  @Column({ length: 7, default: '#05091a' })
+  backgroundColor: string;
+
+  @Column({ length: 7, default: '#ffffff' })
+  textColor: string;
+
+  @Column({ length: 7, default: '#3b82f6' })
+  accentColor: string;
+
+  @Column({ length: 100, default: 'Inter' })
+  fontFamily: string;
+
+  @Column({ length: 50, default: 'default' })
+  layout: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
+```
+
+- [ ] **Step 2: Create `theme.dto.ts`**
+
+```typescript
+// backEnd/src/infrastructure/dto/theme.dto.ts
+import { z } from 'zod';
+
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color (#rrggbb)');
+
+export const CreateThemeDto = z.object({
+  name: z.string().min(1).max(100),
+  primaryColor: hexColor.optional(),
+  secondaryColor: hexColor.optional(),
+  backgroundColor: hexColor.optional(),
+  textColor: hexColor.optional(),
+  accentColor: hexColor.optional(),
+  fontFamily: z.string().max(100).optional(),
+  layout: z.enum(['default', 'minimal', 'centered']).optional(),
+});
+
+export const UpdateThemeDto = CreateThemeDto.partial();
+
+export type CreateThemeDtoType = z.infer<typeof CreateThemeDto>;
+export type UpdateThemeDtoType = z.infer<typeof UpdateThemeDto>;
+```
+
+- [ ] **Step 3: Create `ThemeRepository.ts`**
+
+```typescript
+// backEnd/src/infrastructure/repositories/ThemeRepository.ts
+import { Repository } from 'typeorm';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+import { NotFoundException } from '@shared/exceptions/NotFoundException';
+
+export class ThemeRepository {
+  constructor(private readonly repo: Repository<ThemeEntity>) {}
+
+  findAllByUser(userId: number): Promise<ThemeEntity[]> {
+    return this.repo.find({ where: { userId }, order: { createdAt: 'ASC' } });
+  }
+
+  findByIdAndUser(id: number, userId: number): Promise<ThemeEntity | null> {
+    return this.repo.findOne({ where: { id, userId } });
+  }
+
+  findActiveByUser(userId: number): Promise<ThemeEntity | null> {
+    return this.repo.findOne({ where: { userId, isActive: true } });
+  }
+
+  createForUser(userId: number, data: Partial<ThemeEntity>): Promise<ThemeEntity> {
+    const entity = this.repo.create({ ...data, userId, isActive: false });
+    return this.repo.save(entity);
+  }
+
+  async updateForUser(id: number, userId: number, data: Partial<ThemeEntity>): Promise<ThemeEntity> {
+    const entity = await this.findByIdAndUser(id, userId);
+    if (!entity) throw new NotFoundException('Theme not found');
+    Object.assign(entity, data);
+    return this.repo.save(entity);
+  }
+
+  async deleteForUser(id: number, userId: number): Promise<void> {
+    const entity = await this.findByIdAndUser(id, userId);
+    if (!entity) throw new NotFoundException('Theme not found');
+    await this.repo.remove(entity);
+  }
+
+  async setActive(id: number, userId: number): Promise<ThemeEntity> {
+    // Deactivate all themes for this user
+    await this.repo.update({ userId }, { isActive: false });
+    // Activate the chosen one
+    const entity = await this.findByIdAndUser(id, userId);
+    if (!entity) throw new NotFoundException('Theme not found');
+    entity.isActive = true;
+    return this.repo.save(entity);
+  }
+}
+```
+
+- [ ] **Step 4: Create the 6 use-cases**
+
+```typescript
+// backEnd/src/use-cases/theme/GetThemesUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+export class GetThemesUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(userId: number): Promise<ThemeEntity[]> { return this.repo.findAllByUser(userId); }
+}
+
+// backEnd/src/use-cases/theme/GetActiveThemeUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+export class GetActiveThemeUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(userId: number): Promise<ThemeEntity | null> { return this.repo.findActiveByUser(userId); }
+}
+
+// backEnd/src/use-cases/theme/CreateThemeUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+import { CreateThemeDtoType } from '@infrastructure/dto/theme.dto';
+export class CreateThemeUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(userId: number, data: CreateThemeDtoType): Promise<ThemeEntity> {
+    return this.repo.createForUser(userId, data as any);
+  }
+}
+
+// backEnd/src/use-cases/theme/UpdateThemeUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+import { UpdateThemeDtoType } from '@infrastructure/dto/theme.dto';
+export class UpdateThemeUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(id: number, userId: number, data: UpdateThemeDtoType): Promise<ThemeEntity> {
+    return this.repo.updateForUser(id, userId, data as any);
+  }
+}
+
+// backEnd/src/use-cases/theme/DeleteThemeUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+export class DeleteThemeUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(id: number, userId: number): Promise<void> { return this.repo.deleteForUser(id, userId); }
+}
+
+// backEnd/src/use-cases/theme/SetActiveThemeUseCase.ts
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+export class SetActiveThemeUseCase {
+  constructor(private readonly repo: ThemeRepository) {}
+  execute(id: number, userId: number): Promise<ThemeEntity> {
+    return this.repo.setActive(id, userId);
+  }
+}
+```
+
+- [ ] **Step 5: Create `ThemeController.ts`**
+
+```typescript
+// backEnd/src/infrastructure/controllers/ThemeController.ts
+import { Request, Response, NextFunction } from 'express';
+import { AppDataSource } from '@infrastructure/database/data-source';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
+import { GetThemesUseCase } from '@use-cases/theme/GetThemesUseCase';
+import { GetActiveThemeUseCase } from '@use-cases/theme/GetActiveThemeUseCase';
+import { CreateThemeUseCase } from '@use-cases/theme/CreateThemeUseCase';
+import { UpdateThemeUseCase } from '@use-cases/theme/UpdateThemeUseCase';
+import { DeleteThemeUseCase } from '@use-cases/theme/DeleteThemeUseCase';
+import { SetActiveThemeUseCase } from '@use-cases/theme/SetActiveThemeUseCase';
+
+export class ThemeController {
+  private repo(): ThemeRepository {
+    return new ThemeRepository(AppDataSource.getRepository(ThemeEntity));
+  }
+
+  async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { res.json({ success: true, data: await new GetThemesUseCase(this.repo()).execute(req.user.id) }); }
+    catch (err) { next(err); }
+  }
+
+  async getActive(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { res.json({ success: true, data: await new GetActiveThemeUseCase(this.repo()).execute(req.user.id) }); }
+    catch (err) { next(err); }
+  }
+
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { res.status(201).json({ success: true, data: await new CreateThemeUseCase(this.repo()).execute(req.user.id, req.body) }); }
+    catch (err) { next(err); }
+  }
+
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { res.json({ success: true, data: await new UpdateThemeUseCase(this.repo()).execute(Number(req.params.id), req.user.id, req.body) }); }
+    catch (err) { next(err); }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { await new DeleteThemeUseCase(this.repo()).execute(Number(req.params.id), req.user.id); res.status(204).send(); }
+    catch (err) { next(err); }
+  }
+
+  async activate(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try { res.json({ success: true, data: await new SetActiveThemeUseCase(this.repo()).execute(Number(req.params.id), req.user.id) }); }
+    catch (err) { next(err); }
+  }
+}
+```
+
+- [ ] **Step 6: Create `theme.routes.ts`**
+
+```typescript
+// backEnd/src/infrastructure/routes/theme.routes.ts
+import { Router } from 'express';
+import { ThemeController } from '@infrastructure/controllers/ThemeController';
+import { validate } from '@infrastructure/middlewares/validate';
+import { CreateThemeDto, UpdateThemeDto } from '@infrastructure/dto/theme.dto';
+import { authMiddleware } from '@infrastructure/middlewares/authMiddleware';
+
+const router = Router();
+const ctrl = new ThemeController();
+
+router.use(authMiddleware);
+router.get('/', ctrl.getAll.bind(ctrl));
+router.get('/active', ctrl.getActive.bind(ctrl));
+router.post('/', validate(CreateThemeDto), ctrl.create.bind(ctrl));
+router.put('/:id', validate(UpdateThemeDto), ctrl.update.bind(ctrl));
+router.delete('/:id', ctrl.delete.bind(ctrl));
+router.patch('/:id/activate', ctrl.activate.bind(ctrl));
+
+export default router;
+```
+
+- [ ] **Step 7: Add ThemeEntity to data-source.ts**
+
+In `backEnd/src/infrastructure/database/data-source.ts`, add `ThemeEntity` to the imports and the `entities` array:
+
+```typescript
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+// ...
+entities: [
+  UserEntity, ProjectEntity, SkillEntity,
+  ExperienceEntity, EducationEntity, NewsEntity, SocialLinkEntity,
+  ThemeEntity,
+],
+```
+
+- [ ] **Step 8: Verify TypeScript + tests**
+
+```bash
+cd ~/SaasPortfolio/backEnd && npx tsc --noEmit && npm test
+```
+
+- [ ] **Step 9: Commit + PR**
+
+```bash
+cd ~/SaasPortfolio
+git add backEnd/
+git commit -m "feat(crud): themes CRUD with multi-theme support and activate endpoint"
+git push -u origin feature/backend-crud
+# Open PR: feature/backend-crud → develop
+```
+
+---
+
+## Task 10: Public routes
 
 **Branch:** `feature/backend-public` (from `develop` after Task 8 merged)
 
@@ -2520,11 +2865,14 @@ import { ExperienceRepository } from '@infrastructure/repositories/ExperienceRep
 import { EducationRepository } from '@infrastructure/repositories/EducationRepository';
 import { NewsRepository } from '@infrastructure/repositories/NewsRepository';
 import { SocialLinkRepository } from '@infrastructure/repositories/SocialLinkRepository';
+import { ThemeEntity } from '@infrastructure/entities/ThemeEntity';
+import { ThemeRepository } from '@infrastructure/repositories/ThemeRepository';
 import { NotFoundException } from '@shared/exceptions/NotFoundException';
 import { UserProfile } from '@use-cases/user/GetProfileUseCase';
 
 export interface PublicPortfolio {
   profile: UserProfile;
+  activeTheme: ThemeEntity | null;
   projects: ProjectEntity[];
   skills: SkillEntity[];
   experiences: ExperienceEntity[];
@@ -2542,7 +2890,8 @@ export class GetPublicPortfolioUseCase {
     const { passwordHash: _, ...profile } = user;
     const userId = user.id;
 
-    const [projects, skills, experiences, educations, news, socialLinks] = await Promise.all([
+    const [activeTheme, projects, skills, experiences, educations, news, socialLinks] = await Promise.all([
+      new ThemeRepository(AppDataSource.getRepository(ThemeEntity)).findActiveByUser(userId),
       new ProjectRepository(AppDataSource.getRepository(ProjectEntity)).findAllByUser(userId),
       new SkillRepository(AppDataSource.getRepository(SkillEntity)).findAllByUser(userId),
       new ExperienceRepository(AppDataSource.getRepository(ExperienceEntity)).findAllByUser(userId),
@@ -2551,7 +2900,7 @@ export class GetPublicPortfolioUseCase {
       new SocialLinkRepository(AppDataSource.getRepository(SocialLinkEntity)).findAllByUser(userId),
     ]);
 
-    return { profile, projects, skills, experiences, educations, news, socialLinks };
+    return { profile, activeTheme, projects, skills, experiences, educations, news, socialLinks };
   }
 }
 ```
