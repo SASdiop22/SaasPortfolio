@@ -12,6 +12,9 @@ import projectRoutes from '@infrastructure/routes/project.routes';
 import skillRoutes from '@infrastructure/routes/skill.routes';
 import experienceRoutes from '@infrastructure/routes/experience.routes';
 import educationRoutes from '@infrastructure/routes/education.routes';
+import themeRoutes from '@infrastructure/routes/theme.routes';
+import newsRoutes from '@infrastructure/routes/news.routes';
+import socialLinkRoutes from '@infrastructure/routes/social-link.routes';
 
 const app = express();
 
@@ -25,6 +28,9 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/experiences', experienceRoutes);
 app.use('/api/educations', educationRoutes);
+app.use('/api/themes', themeRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/social-links', socialLinkRoutes);
 
 app.use(errorMiddleware);
 
