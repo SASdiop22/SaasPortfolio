@@ -3,18 +3,21 @@ import { BaseContentEntity } from './BaseContentEntity';
 
 @Entity('educations')
 export class EducationEntity extends BaseContentEntity {
-  @Column()
-  school!: string;
+  @Column({ type: 'varchar', length: 255 })
+  institution!: string;
 
-  @Column({ nullable: true })
-  degree!: string | null;
+  @Column({ type: 'varchar', length: 255 })
+  degree!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   field!: string | null;
 
-  @Column({ type: 'date', nullable: true })
-  startDate!: Date | null;
+  @Column({ type: 'date' })
+  startDate!: Date;
 
   @Column({ type: 'date', nullable: true })
   endDate!: Date | null;
+
+  @Column({ type: 'int', default: 0 })
+  displayOrder!: number;
 }

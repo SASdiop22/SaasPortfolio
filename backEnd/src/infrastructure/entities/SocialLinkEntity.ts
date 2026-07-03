@@ -3,9 +3,12 @@ import { BaseContentEntity } from './BaseContentEntity';
 
 @Entity('social_links')
 export class SocialLinkEntity extends BaseContentEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   platform!: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   url!: string;
+
+  @Column({ type: 'int', default: 0 })
+  displayOrder!: number;
 }
