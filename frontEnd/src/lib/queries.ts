@@ -37,7 +37,7 @@ export function useUploadAvatar() {
       const form = new FormData();
       form.append('avatar', file);
       return api
-        .post<ApiResponse<User>>('/api/me/avatar', form, {
+        .post<ApiResponse<string>>('/api/me/avatar', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         .then((r) => r.data.data);
