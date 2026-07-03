@@ -29,6 +29,7 @@ Thumbs.db
 
 # Superpowers tooling (local dev scaffolding — never commit)
 .superpowers/
+docs/superpowers/
 .claude/
 
 # Test coverage

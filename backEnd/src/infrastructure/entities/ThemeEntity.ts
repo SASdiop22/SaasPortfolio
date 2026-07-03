@@ -24,8 +24,20 @@ export class ThemeEntity {
   @Column()
   name!: string;
 
-  @Column({ type: 'json', nullable: true })
-  colors!: Record<string, string> | null;
+  @Column({ length: 7, default: '#1d4ed8' })
+  primaryColor!: string;
+
+  @Column({ length: 7, default: '#0a1128' })
+  secondaryColor!: string;
+
+  @Column({ length: 7, default: '#05091a' })
+  backgroundColor!: string;
+
+  @Column({ length: 7, default: '#ffffff' })
+  textColor!: string;
+
+  @Column({ length: 7, default: '#3b82f6' })
+  accentColor!: string;
 
   @Column({ nullable: true })
   fontFamily!: string | null;
