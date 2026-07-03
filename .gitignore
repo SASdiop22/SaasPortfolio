@@ -27,10 +27,12 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Superpowers tooling (local dev scaffolding — never commit)
+# Superpowers / Ruflo tooling (local dev scaffolding — never commit)
 .superpowers/
 docs/superpowers/
 .claude/
+.claude-flow/
+.mcp.json
 
 # Test coverage
 coverage/
