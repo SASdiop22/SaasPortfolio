@@ -2,6 +2,9 @@ import 'reflect-metadata';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import helmet from 'helmet';
+import hpp from 'hpp';
+import rateLimit from 'express-rate-limit';
 import { AppDataSource } from '@infrastructure/database/data-source';
 import { errorMiddleware } from '@infrastructure/middlewares/errorMiddleware';
 import { env } from '@config/env';
@@ -19,12 +22,15 @@ import publicRoutes from '@infrastructure/routes/public.routes';
 
 const app = express();
 
+app.use(helmet());
+app.use(hpp());
 app.use(cors({ origin: env.cors.allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/me', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/experiences', experienceRoutes);
