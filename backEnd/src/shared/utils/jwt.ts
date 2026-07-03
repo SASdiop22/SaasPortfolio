@@ -7,8 +7,11 @@ export interface JwtPayload {
   username: string;
 }
 
-export const signJwt = (payload: JwtPayload): string =>
-  jwt.sign(payload, env.jwt.secret, { expiresIn: env.jwt.expiresIn } as jwt.SignOptions);
+export const signJwt = (payload: JwtPayload): string => {
+  const secret = process.env.JWT_SECRET || env.jwt.secret;
+  const expiresIn = process.env.JWT_EXPIRES_IN || env.jwt.expiresIn;
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
+};
 
 export const verifyJwt = (token: string): JwtPayload => {
   try {
