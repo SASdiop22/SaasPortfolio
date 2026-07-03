@@ -3,12 +3,15 @@ import { BaseContentEntity } from './BaseContentEntity';
 
 @Entity('skills')
 export class SkillEntity extends BaseContentEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 150 })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  level!: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
   category!: string | null;
 
-  @Column({ nullable: true })
-  level!: string | null;
+  @Column({ type: 'int', default: 0 })
+  displayOrder!: number;
 }
