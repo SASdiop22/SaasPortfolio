@@ -27,6 +27,7 @@ export const AppDataSource = new DataSource({
     SocialLinkEntity,
     ThemeEntity,
   ],
+  ssl: env.db.host.includes('supabase.co') ? { rejectUnauthorized: false } : false,
   synchronize: env.nodeEnv === 'development',
   logging: env.nodeEnv === 'development',
 });

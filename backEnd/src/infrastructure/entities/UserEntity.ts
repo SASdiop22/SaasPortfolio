@@ -23,13 +23,13 @@ export class UserEntity {
   @Column()
   passwordHash!: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   fullName!: string | null;
 
   @Column({ type: 'text', nullable: true })
   bio!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   avatarUrl!: string | null;
 
   @CreateDateColumn()

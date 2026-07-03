@@ -39,10 +39,10 @@ export class ThemeEntity {
   @Column({ length: 7, default: '#3b82f6' })
   accentColor!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   fontFamily!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   layout!: string | null;
 
   @Column({ default: false })
