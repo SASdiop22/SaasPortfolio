@@ -15,6 +15,7 @@ import educationRoutes from '@infrastructure/routes/education.routes';
 import themeRoutes from '@infrastructure/routes/theme.routes';
 import newsRoutes from '@infrastructure/routes/news.routes';
 import socialLinkRoutes from '@infrastructure/routes/social-link.routes';
+import publicRoutes from '@infrastructure/routes/public.routes';
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/educations', educationRoutes);
 app.use('/api/themes', themeRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/social-links', socialLinkRoutes);
+app.use('/public/u', publicRoutes);
 
 app.use(errorMiddleware);
 
