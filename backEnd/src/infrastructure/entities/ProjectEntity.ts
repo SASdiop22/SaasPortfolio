@@ -3,24 +3,24 @@ import { BaseContentEntity } from './BaseContentEntity';
 
 @Entity('projects')
 export class ProjectEntity extends BaseContentEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 150 })
   title!: string;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column('text', { array: true, default: [] })
-  technologies!: string[];
+  @Column({ type: 'json', nullable: true, default: [] })
+  techStack!: string[];
 
-  @Column({ type: 'date', nullable: true })
-  startDate!: Date | null;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  liveUrl!: string | null;
 
-  @Column({ type: 'date', nullable: true })
-  endDate!: Date | null;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  githubUrl!: string | null;
 
-  @Column({ nullable: true })
-  url!: string | null;
-
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   imageUrl!: string | null;
+
+  @Column({ type: 'int', default: 0 })
+  displayOrder!: number;
 }
