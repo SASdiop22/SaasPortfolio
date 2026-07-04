@@ -24,7 +24,10 @@ const app = express();
 
 app.use(helmet());
 app.use(hpp());
-app.use(cors({ origin: env.cors.allowedOrigins, credentials: true }));
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? env.cors.allowedOrigins : true,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -39,6 +42,8 @@ app.use('/api/themes', themeRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/social-links', socialLinkRoutes);
 app.use('/public/u', publicRoutes);
+
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use(errorMiddleware);
 
