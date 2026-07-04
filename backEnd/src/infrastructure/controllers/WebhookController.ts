@@ -42,10 +42,10 @@ export class WebhookController {
       return;
     }
 
-    const wh = new Webhook(secret);
     let evt: { type: string; data: Record<string, unknown> };
 
     try {
+      const wh = new Webhook(secret);
       evt = wh.verify(req.body as Buffer, {
         'svix-id': req.headers['svix-id'] as string,
         'svix-timestamp': req.headers['svix-timestamp'] as string,
