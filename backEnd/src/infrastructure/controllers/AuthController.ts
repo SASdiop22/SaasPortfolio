@@ -4,12 +4,11 @@ import { UserEntity } from '@infrastructure/entities/UserEntity';
 import { UserRepository } from '@infrastructure/repositories/UserRepository';
 import { RegisterUseCase } from '@use-cases/auth/RegisterUseCase';
 import { LoginUseCase } from '@use-cases/auth/LoginUseCase';
-import { env } from '@config/env';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: 'strict' as const,
-  secure: env.nodeEnv === 'production',
+  sameSite: 'none' as const,
+  secure: true,
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
