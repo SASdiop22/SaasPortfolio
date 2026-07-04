@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Briefcase, GraduationCap } from 'lucide-react';
 import { getPortfolio } from '@/lib/public';
 import { ParticleField } from '@/components/public/ParticleField';
+import ContactModal from '@/components/public/ContactModal';
 import type { Education, Experience, News, Project, Skill, SocialLink, User } from '@/lib/types';
 
 interface PageProps {
@@ -66,17 +67,17 @@ function HeroSection(props: {
       </div>
       <div className="relative z-10 flex flex-col items-center">
         {user.avatarUrl ? (
-          <div className="relative w-28 h-28 rounded-full overflow-hidden mb-6 ring-4 ring-white/10">
-            <Image src={user.avatarUrl} alt={displayName} fill className="object-cover" sizes="112px" />
+          <div className="relative w-36 h-36 rounded-full overflow-hidden mb-6 ring-4 ring-blue-500/30 shadow-lg shadow-blue-900/40">
+            <Image src={user.avatarUrl} alt={displayName} fill className="object-cover" sizes="144px" />
           </div>
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center mb-6 ring-4 ring-white/10">
-            <span className="text-4xl font-bold text-white/60 uppercase">
+          <div className="w-36 h-36 rounded-full bg-gradient-to-br from-blue-800 to-blue-950 flex items-center justify-center mb-6 ring-4 ring-blue-500/30">
+            <span className="text-5xl font-black text-white/80 uppercase">
               {displayName.charAt(0)}
             </span>
           </div>
         )}
-        <h1 className="text-4xl md:text-5xl font-black mb-3">{displayName}</h1>
+        <h1 className="text-4xl md:text-6xl font-black mb-3">{displayName}</h1>
         {user.bio && <p className="text-lg text-gray-400 max-w-xl mb-8">{user.bio}</p>}
         {socialLinks.length > 0 && (
           <div className="flex flex-wrap gap-3 justify-center mb-10">
@@ -100,16 +101,7 @@ function HeroSection(props: {
           >
             Voir mes projets
           </Link>
-          {socialLinks[0] && (
-            <a
-              href={socialLinks[0].url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full border border-white/10 hover:border-white/30 text-sm font-semibold transition-colors"
-            >
-              Me contacter
-            </a>
-          )}
+          <ContactModal username={username} ownerName={displayName} />
         </div>
       </div>
     </section>

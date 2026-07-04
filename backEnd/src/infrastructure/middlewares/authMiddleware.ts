@@ -1,7 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, createClerkClient } from '@clerk/backend';
+import { Resend } from 'resend';
 import { AppDataSource } from '@infrastructure/database/data-source';
 import { UserEntity } from '@infrastructure/entities/UserEntity';
+
+const resend = new Resend(process.env.RESEND_API_KEY ?? '');
+
+function welcomeHtml(name: string, username: string): string {
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+  const portfolioUrl = `${frontendUrl}/u/${username}`;
+  const dashboardUrl = `${frontendUrl}/dashboard`;
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8" /></head>
+<body style="font-family:sans-serif;background:#05091a;color:#fff;max-width:600px;margin:0 auto;padding:32px;">
+  <h1 style="color:#3b82f6;">Bienvenue ${name} 👋</h1>
+  <p>Votre portfolio est prêt. Voici votre URL publique :</p>
+  <a href="${portfolioUrl}" style="display:inline-block;background:#1d4ed8;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:24px;">${portfolioUrl}</a>
+
+  <h2 style="color:#93c5fd;">Pour un portfolio complet :</h2>
+  <ol style="color:#cbd5e1;line-height:2;">
+    <li>Complétez votre <strong>profil</strong> (nom, bio, photo)</li>
+    <li>Ajoutez vos <strong>projets</strong> avec description, liens et stack technique</li>
+    <li>Listez vos <strong>compétences</strong> par catégorie avec niveau</li>
+    <li>Renseignez votre <strong>parcours</strong> (expériences + formations)</li>
+    <li>Publiez des <strong>actualités</strong> pour montrer votre activité</li>
+    <li>Ajoutez vos <strong>liens réseaux</strong> (GitHub, LinkedIn, Twitter…)</li>
+    <li>Choisissez un <strong>thème</strong> pour personnaliser l'apparence</li>
+  </ol>
+
+  <a href="${dashboardUrl}" style="display:inline-block;background:#1d4ed8;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:16px;">Accéder au dashboard →</a>
+
+  <p style="color:#64748b;font-size:12px;margin-top:40px;">SaaS Portfolio — cet email a été envoyé suite à la création de votre compte.</p>
+</body>
+</html>`;
+}
 
 declare global {
   namespace Express {
@@ -53,14 +87,23 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           username = `${baseUsername}_${suffix++}`;
         }
 
+        const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null;
         user = userRepo.create({
           clerkId,
           email,
           username,
-          fullName: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null,
+          fullName,
           passwordHash: null,
         });
         await userRepo.save(user);
+
+        // Send welcome email — fire-and-forget
+        resend.emails.send({
+          from: 'SaaS Portfolio <onboarding@resend.dev>',
+          to: email,
+          subject: `Bienvenue ${clerkUser.firstName ?? username} — votre portfolio est prêt 🎉`,
+          html: welcomeHtml(clerkUser.firstName ?? username, username),
+        }).catch(() => {/* non-blocking */});
       }
     }
 

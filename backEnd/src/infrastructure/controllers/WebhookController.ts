@@ -69,7 +69,7 @@ export class WebhookController {
 
       if (email) {
         await resend.emails.send({
-          from: `Portfolio <noreply@${new URL(frontendUrl).hostname}>`,
+          from: 'SaaS Portfolio <onboarding@resend.dev>',
           to: email,
           subject: `Bienvenue ${firstName} — votre portfolio est prêt 🎉`,
           html: welcomeHtml(firstName, username, frontendUrl),
