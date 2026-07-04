@@ -57,7 +57,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     req.user = { id: user.id, clerkId };
     next();
-  } catch {
+  } catch (err) {
+    console.error('[authMiddleware] error:', err);
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
