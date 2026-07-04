@@ -66,7 +66,7 @@ export class PublicController {
         return;
       }
 
-      await resend.emails.send({
+      const { error: resendError } = await resend.emails.send({
         from: 'Portfolio Contact <onboarding@resend.dev>',
         to: owner.email,
         replyTo: senderEmail,
@@ -78,6 +78,12 @@ export class PublicController {
           <p>${message.replaceAll('\n', '<br>')}</p>
         `,
       });
+
+      if (resendError) {
+        console.error('[contact] Resend error:', resendError);
+        res.status(500).json({ success: false, message: 'Erreur lors de l\'envoi de l\'email.' });
+        return;
+      }
 
       res.status(200).json({ success: true, message: 'Message envoyé.' });
     } catch (err) {

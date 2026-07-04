@@ -103,7 +103,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           to: email,
           subject: `Bienvenue ${clerkUser.firstName ?? username} — votre portfolio est prêt 🎉`,
           html: welcomeHtml(clerkUser.firstName ?? username, username),
-        }).catch(() => {/* non-blocking */});
+        }).then(({ error }) => {
+          if (error) console.error('[welcome email] Resend error:', error);
+        }).catch((err) => console.error('[welcome email] send failed:', err));
       }
     }
 
