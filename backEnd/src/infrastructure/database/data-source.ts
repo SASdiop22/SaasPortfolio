@@ -16,7 +16,7 @@ const entities = [
 ];
 
 const isProduction = env.nodeEnv === 'production';
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
 
 const options: DataSourceOptions = databaseUrl
   ? {
