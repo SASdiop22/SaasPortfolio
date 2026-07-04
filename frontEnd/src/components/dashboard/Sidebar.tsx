@@ -13,7 +13,7 @@ import {
   Palette,
   LogOut,
 } from 'lucide-react';
-import { logout } from '@/lib/auth';
+import { useClerk } from '@clerk/nextjs';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -31,13 +31,10 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      router.replace('/login');
-    }
+  const handleLogout = () => {
+    signOut(() => router.replace('/login'));
   };
 
   return (
