@@ -8,12 +8,21 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Response interceptor: unwrap { success, data } envelope
+api.interceptors.request.use(async (config) => {
+  if (globalThis.window !== undefined) {
+    try {
+      const token = await (globalThis as typeof globalThis & { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk?.session?.getToken();
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    } catch {
+      // Clerk not loaded yet — request proceeds without token
+    }
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    return Promise.reject(err);
-  }
+  (err) => Promise.reject(err),
 );
 
 export default api;

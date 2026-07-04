@@ -20,8 +20,11 @@ export class UserEntity {
   @Column()
   email!: string;
 
-  @Column()
-  passwordHash!: string;
+  @Column({ type: 'varchar', nullable: true })
+  clerkId!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  passwordHash!: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   fullName!: string | null;

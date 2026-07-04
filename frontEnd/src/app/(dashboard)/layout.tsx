@@ -1,23 +1,24 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { getMe } from '@/lib/auth';
+import { useEffect } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMe()
-      .catch(() => router.replace('/login'))
-      .finally(() => setLoading(false));
-  }, [router]);
+    if (isLoaded && !isSignedIn) {
+      router.replace('/login');
+    }
+  }, [isLoaded, isSignedIn, router]);
 
-  if (loading) {
+  if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-screen bg-[#05091a] flex items-center justify-center text-white">
-        Chargement...
+        Chargement…
       </div>
     );
   }

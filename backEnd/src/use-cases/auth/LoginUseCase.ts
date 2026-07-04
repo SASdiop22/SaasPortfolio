@@ -11,6 +11,7 @@ export class LoginUseCase {
     const user = await this.userRepo.findByEmail(data.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
+    if (!user.passwordHash) throw new UnauthorizedException('Invalid credentials');
     const valid = await comparePassword(data.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 

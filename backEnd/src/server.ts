@@ -19,12 +19,16 @@ import themeRoutes from '@infrastructure/routes/theme.routes';
 import newsRoutes from '@infrastructure/routes/news.routes';
 import socialLinkRoutes from '@infrastructure/routes/social-link.routes';
 import publicRoutes from '@infrastructure/routes/public.routes';
+import webhookRoutes from '@infrastructure/routes/webhook.routes';
 
 const app = express();
 
 app.use(helmet());
 app.use(hpp());
 app.use(cors({ origin: true, credentials: true }));
+
+app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
+
 app.use(express.json());
 app.use(cookieParser());
 
