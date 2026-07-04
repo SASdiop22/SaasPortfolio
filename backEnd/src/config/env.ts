@@ -19,6 +19,10 @@ export const env = {
     serviceKey: process.env.SUPABASE_SERVICE_KEY || '',
   },
   cors: {
-    allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(','),
+    allowedOrigins: (
+      process.env.ALLOWED_ORIGINS ||
+      process.env.FRONTEND_URL ||
+      'http://localhost:3000'
+    ).split(','),
   },
 } as const;
