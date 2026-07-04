@@ -1,7 +1,7 @@
 import type { News } from '@/lib/types';
 
 interface Props {
-  news: News[];
+  readonly news: News[];
 }
 
 export function PublicNews({ news }: Props) {
@@ -9,7 +9,7 @@ export function PublicNews({ news }: Props) {
   if (published.length === 0) return null;
 
   return (
-    <section className="py-16 px-6 max-w-4xl mx-auto">
+    <section id="actualites" className="py-16 px-6 max-w-4xl mx-auto">
       <h2 className="text-3xl font-bold mb-10 text-center">Actualités</h2>
       <div className="flex flex-col gap-4">
         {published.map((item) => (
@@ -20,7 +20,7 @@ export function PublicNews({ news }: Props) {
             <div className="flex-1">
               <h3 className="font-semibold text-base mb-1">{item.title}</h3>
               <p className="text-sm text-gray-400">
-                {new Date(item.publishedAt!).toLocaleDateString('fr-FR', {
+                {new Date(item.publishedAt as string).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',

@@ -34,7 +34,7 @@ export function PublicSkills({ skills }: Props) {
   const categories = Object.keys(grouped);
 
   return (
-    <section className="py-16 px-6 max-w-5xl mx-auto">
+    <section id="competences" className="py-16 px-6 max-w-5xl mx-auto">
       <h2 className="text-3xl font-bold mb-10 text-center">Compétences</h2>
 
       {categories.map((cat) => (

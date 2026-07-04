@@ -26,7 +26,7 @@ export function PublicTimeline({ experiences, educations }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section className="py-16 px-6 max-w-3xl mx-auto">
+    <section id="parcours" className="py-16 px-6 max-w-3xl mx-auto">
       <h2 className="text-3xl font-bold mb-10 text-center">Parcours</h2>
 
       <div className="relative border-l-2 border-white/10 ml-4">

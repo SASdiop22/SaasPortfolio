@@ -8,7 +8,7 @@ interface Props {
 
 export function PublicHero({ user, socialLinks }: Props) {
   return (
-    <section className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 py-20">
+    <section id="hero" className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 pt-28 pb-20">
       {user.avatarUrl ? (
         <div className="relative w-28 h-28 rounded-full overflow-hidden mb-6 ring-4 ring-white/10">
           <Image
