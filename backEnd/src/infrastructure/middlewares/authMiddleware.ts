@@ -34,25 +34,34 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     if (!user) {
       const clerkUser = await clerk.users.getUser(clerkId);
       const email = clerkUser.emailAddresses[0]?.emailAddress ?? '';
-      const baseUsername = (clerkUser.username ?? email.split('@')[0])
-        .toLowerCase()
-        .replace(/[^a-z0-9_-]/g, '_')
-        .slice(0, 28);
 
-      let username = baseUsername;
-      let suffix = 1;
-      while (await userRepo.findOne({ where: { username } })) {
-        username = `${baseUsername}_${suffix++}`;
+      // User might exist from the old JWT auth system — link it to Clerk
+      user = await userRepo.findOne({ where: { email } });
+
+      if (user) {
+        user.clerkId = clerkId;
+        await userRepo.save(user);
+      } else {
+        const baseUsername = (clerkUser.username ?? email.split('@')[0])
+          .toLowerCase()
+          .replace(/[^a-z0-9_-]/g, '_')
+          .slice(0, 28);
+
+        let username = baseUsername;
+        let suffix = 1;
+        while (await userRepo.findOne({ where: { username } })) {
+          username = `${baseUsername}_${suffix++}`;
+        }
+
+        user = userRepo.create({
+          clerkId,
+          email,
+          username,
+          fullName: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null,
+          passwordHash: null,
+        });
+        await userRepo.save(user);
       }
-
-      user = userRepo.create({
-        clerkId,
-        email,
-        username,
-        fullName: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null,
-        passwordHash: null,
-      });
-      await userRepo.save(user);
     }
 
     req.user = { id: user.id, clerkId };
