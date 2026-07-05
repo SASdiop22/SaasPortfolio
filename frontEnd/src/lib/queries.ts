@@ -21,10 +21,12 @@ export function useProfile() {
   });
 }
 
+type UpdateProfilePayload = { firstName: string; lastName: string; bio?: string };
+
 export function useUpdateProfile() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<User>) =>
+    mutationFn: (data: UpdateProfilePayload) =>
       api.put<ApiResponse<User>>('/api/me', data).then((r) => r.data.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
   });

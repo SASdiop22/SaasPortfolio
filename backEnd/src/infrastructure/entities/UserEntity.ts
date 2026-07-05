@@ -27,6 +27,12 @@ export class UserEntity {
   passwordHash!: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
+  firstName!: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  lastName!: string | null;
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
   fullName!: string | null;
 
   @Column({ type: 'text', nullable: true })

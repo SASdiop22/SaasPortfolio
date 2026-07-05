@@ -17,9 +17,8 @@ export default function ProfilPage() {
 
   useEffect(() => {
     if (user) {
-      const parts = (user.fullName ?? '').trim().split(/\s+/);
-      setPrenom(parts[0] ?? '');
-      setNom(parts.slice(1).join(' '));
+      setPrenom(user.firstName ?? '');
+      setNom(user.lastName ?? '');
       setBio(user.bio ?? '');
     }
   }, [user]);
@@ -31,8 +30,11 @@ export default function ProfilPage() {
       return;
     }
     setFormError('');
-    const fullName = `${prenom.trim()} ${nom.trim()}`;
-    await updateProfile.mutateAsync({ fullName, ...(bio.trim() && { bio: bio.trim() }) });
+    await updateProfile.mutateAsync({
+      firstName: prenom.trim(),
+      lastName: nom.trim(),
+      ...(bio.trim() && { bio: bio.trim() }),
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
