@@ -46,11 +46,13 @@ export default function ClassicLayout({ username, user, theme, projects, skills,
         </div>
         <div className="relative z-10 flex flex-col items-center">
           {user.avatarUrl ? (
-            <div className="relative w-36 h-36 rounded-full overflow-hidden mb-6 ring-4 shadow-lg" style={{ ringColor: accent }}>
+            <div className="relative w-36 h-36 rounded-full overflow-hidden mb-6"
+              style={{ boxShadow: `0 0 0 4px ${accent}40` }}>
               <Image src={user.avatarUrl} alt={displayName} fill className="object-cover" sizes="144px" />
             </div>
           ) : (
-            <div className="w-36 h-36 rounded-full flex items-center justify-center mb-6 ring-4" style={{ background: `linear-gradient(135deg, ${primary}, ${accent})` }}>
+            <div className="w-36 h-36 rounded-full flex items-center justify-center mb-6"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${accent})`, boxShadow: `0 0 0 4px ${accent}40` }}>
               <span className="text-5xl font-black uppercase" style={{ color: text }}>{displayName.charAt(0)}</span>
             </div>
           )}
