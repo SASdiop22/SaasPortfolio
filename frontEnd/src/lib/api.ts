@@ -8,14 +8,26 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use(async (config) => {
-  if (globalThis.window !== undefined) {
-    try {
-      const token = await (globalThis as typeof globalThis & { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk?.session?.getToken();
-      if (token) config.headers.Authorization = `Bearer ${token}`;
-    } catch {
-      // Clerk not loaded yet — request proceeds without token
+async function getClerkToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+
+  // Wait up to 5 seconds for Clerk session to be available
+  for (let i = 0; i < 50; i++) {
+    const clerk = (window as typeof window & { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk;
+    if (clerk?.session) {
+      return clerk.session.getToken();
     }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return null;
+}
+
+api.interceptors.request.use(async (config) => {
+  try {
+    const token = await getClerkToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // proceed without token
   }
   return config;
 });
