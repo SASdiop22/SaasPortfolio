@@ -29,7 +29,7 @@ interface Props {
 }
 
 export default function MinimalLayout({ username, user, theme, projects, skills, timeline, news, socialLinks }: Props) {
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
   const primary = theme?.primaryColor ?? '#1d4ed8';
   const accent = theme?.accentColor ?? '#3b82f6';
   const bg = theme?.backgroundColor ?? '#fafafa';
@@ -52,8 +52,11 @@ export default function MinimalLayout({ username, user, theme, projects, skills,
             </div>
           )}
           <div className="flex-1">
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none mb-4" style={{ color: text }}>
-              {displayName}
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none mb-4">
+              <span style={{ color: text }}>{user.firstName ?? displayName}</span>
+              {user.lastName && (
+                <><br /><span style={{ color: primary }}>{user.lastName}</span></>
+              )}
             </h1>
             {user.bio && (
               <p className="text-lg leading-relaxed mb-8 max-w-xl" style={{ color: `${text}70` }}>{user.bio}</p>

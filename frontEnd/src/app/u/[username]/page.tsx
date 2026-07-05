@@ -17,7 +17,7 @@ type TimelineEntry =
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) return { title: 'Portfolio introuvable' };
-  const name = portfolio.user.fullName ?? portfolio.user.username;
+  const name = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
   return {
     title: `${name} — Portfolio`,
     description: portfolio.user.bio ?? `Portfolio de ${portfolio.user.username}`,

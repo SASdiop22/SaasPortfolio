@@ -8,7 +8,6 @@ export const RegisterDto = z.object({
     .regex(/^[a-z0-9_-]+$/, 'Only lowercase letters, numbers, _ and - allowed'),
   email: z.string().email(),
   password: z.string().min(8),
-  fullName: z.string().min(2).max(100).optional(),
 });
 
 export const LoginDto = z.object({

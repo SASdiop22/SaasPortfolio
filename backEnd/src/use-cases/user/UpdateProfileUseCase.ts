@@ -22,7 +22,6 @@ export class UpdateProfileUseCase {
 
     user.firstName = data.firstName;
     user.lastName = data.lastName;
-    user.fullName = `${data.firstName} ${data.lastName}`;
     if (data.bio !== undefined) user.bio = data.bio ?? null;
 
     const updated = await this.repository.save(user);

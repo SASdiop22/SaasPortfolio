@@ -16,7 +16,6 @@ export async function register(data: {
   username: string;
   email: string;
   password: string;
-  fullName?: string;
 }): Promise<{ id: number; username: string }> {
   const res = await api.post<ApiResponse<{ id: number; username: string }>>(
     '/api/auth/register',

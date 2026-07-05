@@ -9,7 +9,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) return { title: 'Introuvable' };
-  const name = portfolio.user.fullName ?? portfolio.user.username;
+  const name = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
   return { title: `Compétences — ${name}` };
 }
 
@@ -30,7 +30,7 @@ export default async function CompetencesPage({ params }: PageProps) {
   if (!portfolio) notFound();
 
   const { skills, user, activeTheme } = portfolio;
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
 
   const secondary = activeTheme?.secondaryColor ?? '#0a1128';
   const text = activeTheme?.textColor ?? '#ffffff';

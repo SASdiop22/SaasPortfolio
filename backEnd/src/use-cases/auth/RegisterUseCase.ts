@@ -19,7 +19,6 @@ export class RegisterUseCase {
       username: data.username,
       email: data.email,
       passwordHash,
-      fullName: data.fullName ?? null,
     });
 
     const payload: JwtPayload = { id: user.id, username: user.username };

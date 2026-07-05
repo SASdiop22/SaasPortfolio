@@ -31,7 +31,7 @@ interface Props {
 }
 
 export default function ClassicLayout({ username, user, theme, projects, skills, timeline, news, socialLinks }: Props) {
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
   const primary = theme?.primaryColor ?? '#1d4ed8';
   const accent = theme?.accentColor ?? '#3b82f6';
   const bg = theme?.backgroundColor ?? '#05091a';
@@ -56,7 +56,12 @@ export default function ClassicLayout({ username, user, theme, projects, skills,
               <span className="text-5xl font-black uppercase" style={{ color: text }}>{displayName.charAt(0)}</span>
             </div>
           )}
-          <h1 className="text-4xl md:text-6xl font-black mb-3" style={{ color: text }}>{displayName}</h1>
+          <h1 className="text-4xl md:text-6xl font-black mb-3">
+            <span style={{ color: text }}>{user.firstName ?? displayName}</span>
+            {user.lastName && (
+              <><br /><span style={{ color: accent }}>{user.lastName}</span></>
+            )}
+          </h1>
           {user.bio && <p className="text-lg max-w-xl mb-8" style={{ color: `${text}99` }}>{user.bio}</p>}
           {socialLinks.length > 0 && (
             <div className="flex flex-wrap gap-3 justify-center mb-10">

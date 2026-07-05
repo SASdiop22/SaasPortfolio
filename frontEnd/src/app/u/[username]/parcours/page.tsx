@@ -21,7 +21,7 @@ function formatRange(startDate: string, endDate: string | null): string {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) return { title: 'Portfolio introuvable' };
-  const displayName = portfolio.user.fullName ?? portfolio.user.username;
+  const displayName = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
   return { title: `Parcours — ${displayName}` };
 }
 
@@ -83,7 +83,7 @@ export default async function ParcoursPage({ params }: PageProps) {
   if (!portfolio) notFound();
 
   const { activeTheme } = portfolio;
-  const displayName = portfolio.user.fullName ?? portfolio.user.username;
+  const displayName = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
 
   const primary = activeTheme?.primaryColor ?? '#1d4ed8';
   const accent = activeTheme?.accentColor ?? '#3b82f6';

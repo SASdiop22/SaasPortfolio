@@ -11,7 +11,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) return { title: 'Introuvable' };
-  const name = portfolio.user.fullName ?? portfolio.user.username;
+  const name = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
   return { title: `Projets — ${name}` };
 }
 
@@ -20,7 +20,7 @@ export default async function ProjetsPage({ params }: PageProps) {
   if (!portfolio) notFound();
 
   const { projects, user, activeTheme } = portfolio;
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
 
   const primary = activeTheme?.primaryColor ?? '#1d4ed8';
   const accent = activeTheme?.accentColor ?? '#3b82f6';

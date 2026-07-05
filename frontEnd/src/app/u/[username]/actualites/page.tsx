@@ -26,7 +26,7 @@ function excerpt(content: string): string {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) return { title: 'Portfolio introuvable' };
-  const displayName = portfolio.user.fullName ?? portfolio.user.username;
+  const displayName = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
   return { title: `Actualités — ${displayName}` };
 }
 
@@ -73,7 +73,7 @@ export default async function ActualitesPage({ params }: PageProps) {
   if (!portfolio) notFound();
 
   const { activeTheme } = portfolio;
-  const displayName = portfolio.user.fullName ?? portfolio.user.username;
+  const displayName = [portfolio.user.firstName, portfolio.user.lastName].filter(Boolean).join(' ') || portfolio.user.username;
 
   const secondary = activeTheme?.secondaryColor ?? '#0a1128';
   const text = activeTheme?.textColor ?? '#ffffff';

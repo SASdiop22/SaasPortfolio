@@ -89,14 +89,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
         const firstName = clerkUser.firstName ?? null;
         const lastName = clerkUser.lastName ?? null;
-        const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
         user = userRepo.create({
           clerkId,
           email,
           username,
           firstName,
           lastName,
-          fullName,
           passwordHash: null,
         });
         await userRepo.save(user);

@@ -7,13 +7,14 @@ interface Props {
 }
 
 export function PublicHero({ user, socialLinks }: Props) {
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
   return (
     <section id="hero" className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6 pt-28 pb-20">
       {user.avatarUrl ? (
         <div className="relative w-28 h-28 rounded-full overflow-hidden mb-6 ring-4 ring-white/10">
           <Image
             src={user.avatarUrl}
-            alt={user.fullName ?? user.username}
+            alt={displayName}
             fill
             className="object-cover"
             sizes="112px"
@@ -22,13 +23,13 @@ export function PublicHero({ user, socialLinks }: Props) {
       ) : (
         <div className="w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center mb-6 ring-4 ring-white/10">
           <span className="text-4xl font-bold text-white/60 uppercase">
-            {(user.fullName ?? user.username).charAt(0)}
+            {displayName.charAt(0)}
           </span>
         </div>
       )}
 
       <h1 className="text-4xl md:text-5xl font-black mb-3">
-        {user.fullName ?? user.username}
+        {displayName}
       </h1>
 
       {user.bio && (

@@ -13,7 +13,7 @@ export default async function PublicLayout({ children, params }: LayoutProps) {
   if (!portfolio) notFound();
 
   const { user, activeTheme, socialLinks } = portfolio;
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
 
   const bg = activeTheme?.backgroundColor ?? '#05091a';
   const text = activeTheme?.textColor ?? '#ffffff';

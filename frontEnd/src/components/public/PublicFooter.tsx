@@ -10,7 +10,7 @@ interface Props {
 
 export function PublicFooter({ username, user, socialLinks, theme }: Props) {
   const base = `/u/${username}`;
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
 
   const bg = theme?.backgroundColor ?? '#0a0f1e';
   const text = theme?.textColor ?? '#ffffff';

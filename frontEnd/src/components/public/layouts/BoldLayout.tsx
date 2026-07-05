@@ -29,7 +29,7 @@ interface Props {
 }
 
 export default function BoldLayout({ username, user, theme, projects, skills, timeline, news, socialLinks }: Props) {
-  const displayName = user.fullName ?? user.username;
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
   const primary = theme?.primaryColor ?? '#7c3aed';
   const accent = theme?.accentColor ?? '#a78bfa';
   const bg = theme?.backgroundColor ?? '#09090b';
@@ -56,12 +56,12 @@ export default function BoldLayout({ username, user, theme, projects, skills, ti
               </div>
 
               <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none mb-6">
-                <span style={{ color: text }}>{displayName.split(' ')[0]}</span>
-                {displayName.split(' ').length > 1 && (
+                <span style={{ color: text }}>{user.firstName ?? displayName}</span>
+                {user.lastName && (
                   <>
                     <br />
                     <span style={{ WebkitTextStroke: `2px ${accent}`, color: 'transparent' }}>
-                      {displayName.split(' ').slice(1).join(' ')}
+                      {user.lastName}
                     </span>
                   </>
                 )}
