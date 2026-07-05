@@ -29,8 +29,11 @@ export default async function CompetencesPage({ params }: PageProps) {
   const portfolio = await getPortfolio(params.username);
   if (!portfolio) notFound();
 
-  const { skills, user } = portfolio;
+  const { skills, user, activeTheme } = portfolio;
   const displayName = user.fullName ?? user.username;
+
+  const secondary = activeTheme?.secondaryColor ?? '#0a1128';
+  const text = activeTheme?.textColor ?? '#ffffff';
 
   const grouped = skills.reduce<Record<string, Skill[]>>((acc, skill) => {
     const cat = skill.category ?? 'Autres';
@@ -47,22 +50,26 @@ export default async function CompetencesPage({ params }: PageProps) {
     <div className="pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-6">
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-center">Compétences</h1>
-        <p className="text-slate-400 text-center mb-16">{displayName}</p>
+        <p className="text-center mb-16" style={{ color: `${text}99` }}>{displayName}</p>
 
         {skills.length === 0 ? (
-          <p className="text-center text-slate-500 py-20">Aucune compétence pour le moment.</p>
+          <p className="text-center py-20" style={{ color: `${text}80` }}>Aucune compétence pour le moment.</p>
         ) : (
           <div className="space-y-12">
             {categories.map(([category, items]) => (
               <section key={category}>
-                <h2 className="text-xl font-semibold mb-5 text-white border-b border-white/10 pb-3">
+                <h2
+                  className="text-xl font-semibold mb-5 pb-3 border-b"
+                  style={{ color: text, borderColor: `${text}15` }}
+                >
                   {category}
                 </h2>
                 <div className="flex flex-wrap gap-3">
                   {items.map((skill) => (
                     <div
                       key={skill.id}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0a1128] border border-white/10 text-sm"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm"
+                      style={{ backgroundColor: secondary, borderColor: `${text}15`, color: text }}
                     >
                       <span className="font-medium">{skill.name}</span>
                       {skill.level && (

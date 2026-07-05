@@ -15,17 +15,16 @@ export default async function PublicLayout({ children, params }: LayoutProps) {
   const { user, activeTheme, socialLinks } = portfolio;
   const displayName = user.fullName ?? user.username;
 
-  const themeStyle: React.CSSProperties = activeTheme
-    ? { backgroundColor: activeTheme.backgroundColor, color: activeTheme.textColor }
-    : { backgroundColor: '#05091a', color: '#ffffff' };
+  const bg = activeTheme?.backgroundColor ?? '#05091a';
+  const text = activeTheme?.textColor ?? '#ffffff';
 
   return (
     <>
-      <PublicNavbar username={params.username} displayName={displayName} />
-      <div className="min-h-screen" style={themeStyle}>
+      <PublicNavbar username={params.username} displayName={displayName} theme={activeTheme ?? null} />
+      <div className="min-h-screen" style={{ backgroundColor: bg, color: text }}>
         {children}
       </div>
-      <PublicFooter username={params.username} user={user} socialLinks={socialLinks} />
+      <PublicFooter username={params.username} user={user} socialLinks={socialLinks} theme={activeTheme ?? null} />
     </>
   );
 }

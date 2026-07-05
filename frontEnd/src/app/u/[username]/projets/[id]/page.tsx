@@ -22,11 +22,17 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const project = portfolio.projects.find((p) => p.id === Number(params.id));
   if (!project) notFound();
 
+  const { activeTheme } = portfolio;
+  const primary = activeTheme?.primaryColor ?? '#1d4ed8';
+  const accent = activeTheme?.accentColor ?? '#3b82f6';
+  const text = activeTheme?.textColor ?? '#ffffff';
+
   return (
     <main className="pt-24 pb-16 px-6 max-w-4xl mx-auto">
       <Link
         href={`/u/${params.username}/projets`}
-        className="text-sm text-slate-400 hover:text-white transition-colors mb-8 inline-flex items-center gap-1"
+        className="text-sm mb-8 inline-flex items-center gap-1 transition-opacity hover:opacity-100"
+        style={{ color: `${text}80` }}
       >
         ← Retour aux projets
       </Link>
@@ -43,14 +49,15 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         />
       )}
 
-      <h1 className="text-3xl md:text-4xl font-black mb-4">{project.title}</h1>
+      <h1 className="text-3xl md:text-4xl font-black mb-4" style={{ color: text }}>{project.title}</h1>
 
       {project.techStack.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
           {project.techStack.map((tech) => (
             <span
               key={tech}
-              className="text-sm px-3 py-1 rounded-full bg-blue-900/40 text-blue-300"
+              className="text-sm px-3 py-1 rounded-full"
+              style={{ backgroundColor: `${primary}33`, color: accent }}
             >
               {tech}
             </span>
@@ -59,7 +66,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       )}
 
       {project.description && (
-        <p className="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap mb-8">
+        <p className="leading-relaxed text-lg whitespace-pre-wrap mb-8" style={{ color: `${text}CC` }}>
           {project.description}
         </p>
       )}
@@ -70,7 +77,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             href={project.liveUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-xl font-medium text-sm transition-colors bg-blue-700 hover:bg-blue-600 text-white"
+            className="px-6 py-3 rounded-xl font-medium text-sm transition-opacity hover:opacity-90"
+            style={{ backgroundColor: primary, color: text }}
           >
             Voir le projet →
           </a>
@@ -80,7 +88,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             href={project.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 rounded-xl font-medium text-sm transition-colors border border-white/20 hover:border-white/40 text-slate-300"
+            className="px-6 py-3 rounded-xl font-medium text-sm transition-opacity hover:opacity-80 border"
+            style={{ borderColor: `${text}33`, color: `${text}CC` }}
           >
             Voir sur GitHub
           </a>

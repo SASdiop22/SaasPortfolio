@@ -34,11 +34,15 @@ export default async function NewsDetailPage({ params }: PageProps) {
   );
   if (!article || article.publishedAt === null) notFound();
 
+  const { activeTheme } = portfolio;
+  const text = activeTheme?.textColor ?? '#ffffff';
+
   return (
     <main className="pt-24 pb-16 px-6 max-w-3xl mx-auto">
       <Link
         href={`/u/${params.username}/actualites`}
-        className="text-sm text-slate-400 hover:text-white transition-colors mb-8 inline-flex items-center gap-1"
+        className="text-sm mb-8 inline-flex items-center gap-1 transition-opacity hover:opacity-100"
+        style={{ color: `${text}80` }}
       >
         ← Retour aux actualités
       </Link>
@@ -55,10 +59,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
         />
       )}
 
-      <p className="text-sm text-slate-500 mb-2">{formatDate(article.publishedAt)}</p>
-      <h1 className="text-3xl md:text-4xl font-black mb-8">{article.title}</h1>
-      <hr className="border-t border-white/10 mb-8" />
-      <p className="text-slate-300 leading-relaxed text-base whitespace-pre-wrap">
+      <p className="text-sm mb-2" style={{ color: `${text}60` }}>{formatDate(article.publishedAt)}</p>
+      <h1 className="text-3xl md:text-4xl font-black mb-8" style={{ color: text }}>{article.title}</h1>
+      <hr className="mb-8" style={{ borderColor: `${text}15` }} />
+      <p className="leading-relaxed text-base whitespace-pre-wrap" style={{ color: `${text}CC` }}>
         {article.content}
       </p>
     </main>
