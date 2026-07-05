@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
   return (
     <div className="flex min-h-screen bg-[#05091a]">
       <Sidebar />
-      <main className="flex-1 p-8 text-white overflow-auto">{children}</main>
+      <main className="flex-1 p-8 pt-16 md:pt-8 text-white overflow-auto">{children}</main>
     </div>
   );
 }
