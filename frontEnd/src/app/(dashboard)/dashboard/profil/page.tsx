@@ -9,20 +9,30 @@ export default function ProfilPage() {
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
 
-  const [fullName, setFullName] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [nom, setNom] = useState('');
   const [bio, setBio] = useState('');
+  const [formError, setFormError] = useState('');
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setFullName(user.fullName ?? '');
+      const parts = (user.fullName ?? '').trim().split(/\s+/);
+      setPrenom(parts[0] ?? '');
+      setNom(parts.slice(1).join(' '));
       setBio(user.bio ?? '');
     }
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile.mutateAsync({ fullName, bio });
+    if (!prenom.trim() || !nom.trim()) {
+      setFormError('Le prénom et le nom sont requis.');
+      return;
+    }
+    setFormError('');
+    const fullName = `${prenom.trim()} ${nom.trim()}`;
+    await updateProfile.mutateAsync({ fullName, ...(bio.trim() && { bio: bio.trim() }) });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -80,13 +90,22 @@ export default function ProfilPage() {
           Informations
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FormField
-            label="Nom complet"
-            type="text"
-            placeholder="Jean Dupont"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              label="Prénom *"
+              type="text"
+              placeholder="Jean"
+              value={prenom}
+              onChange={(e) => setPrenom(e.target.value)}
+            />
+            <FormField
+              label="Nom *"
+              type="text"
+              placeholder="Dupont"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+            />
+          </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-300">Biographie</label>
             <textarea
@@ -97,6 +116,7 @@ export default function ProfilPage() {
               onChange={(e) => setBio(e.target.value)}
             />
           </div>
+          {formError && <p className="text-sm text-red-400">{formError}</p>}
           {updateProfile.isError && (
             <p className="text-sm text-red-400">Erreur lors de la sauvegarde.</p>
           )}
