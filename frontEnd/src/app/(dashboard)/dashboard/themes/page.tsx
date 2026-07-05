@@ -13,22 +13,31 @@ import Modal from '@/components/dashboard/Modal';
 import FormField from '@/components/ui/FormField';
 import type { Theme } from '@/lib/types';
 
+const LAYOUTS = [
+  { value: 'classic', label: 'Classic', desc: 'Sombre, particules animées, avatar rond' },
+  { value: 'minimal', label: 'Minimal', desc: 'Épuré, typographie large, sans animations' },
+  { value: 'bold', label: 'Bold', desc: 'Gradient dramatique, sections impactantes' },
+] as const;
+
+type LayoutValue = (typeof LAYOUTS)[number]['value'];
+
 type FormState = {
   name: string;
+  layout: LayoutValue;
   primaryColor: string;
   secondaryColor: string;
   backgroundColor: string;
   textColor: string;
   accentColor: string;
 };
-const EMPTY: FormState = {
-  name: '',
-  primaryColor: '#3b82f6',
-  secondaryColor: '#1d4ed8',
-  backgroundColor: '#05091a',
-  textColor: '#ffffff',
-  accentColor: '#60a5fa',
+
+const LAYOUT_DEFAULTS: Record<LayoutValue, Omit<FormState, 'name' | 'layout'>> = {
+  classic: { primaryColor: '#1d4ed8', secondaryColor: '#0a1128', backgroundColor: '#05091a', textColor: '#ffffff', accentColor: '#3b82f6' },
+  minimal: { primaryColor: '#1d4ed8', secondaryColor: '#e2e8f0', backgroundColor: '#fafafa', textColor: '#0f172a', accentColor: '#3b82f6' },
+  bold:    { primaryColor: '#7c3aed', secondaryColor: '#4c1d95', backgroundColor: '#09090b', textColor: '#fafafa', accentColor: '#a78bfa' },
 };
+
+const EMPTY: FormState = { name: '', layout: 'classic', ...LAYOUT_DEFAULTS.classic };
 
 const COLUMNS: Column<Theme>[] = [
   { key: 'name', label: 'Nom' },
@@ -73,6 +82,7 @@ export default function ThemesPage() {
     setEditing(row);
     setForm({
       name: row.name,
+      layout: (row.layout as LayoutValue | null) ?? 'classic',
       primaryColor: row.primaryColor,
       secondaryColor: row.secondaryColor,
       backgroundColor: row.backgroundColor,
@@ -89,9 +99,9 @@ export default function ThemesPage() {
     if (!form.name.trim()) { setFormError('Le nom est requis.'); return; }
     try {
       if (modal === 'edit' && editing) {
-        await update.mutateAsync({ id: editing.id, ...form });
+        await update.mutateAsync({ id: editing.id, ...form, layout: form.layout });
       } else {
-        await create.mutateAsync(form);
+        await create.mutateAsync({ ...form, layout: form.layout });
       }
       closeModal();
     } catch {
@@ -142,6 +152,29 @@ export default function ThemesPage() {
       <Modal isOpen={modal !== null} onClose={closeModal} title={modal === 'edit' ? 'Modifier le thème' : 'Nouveau thème'}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <FormField label="Nom *" type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Mon thème" />
+
+          {/* Layout selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Layout</label>
+            <div className="grid grid-cols-3 gap-2">
+              {LAYOUTS.map((l) => (
+                <button
+                  key={l.value}
+                  type="button"
+                  onClick={() => {
+                    const defaults = LAYOUT_DEFAULTS[l.value];
+                    setForm((f) => ({ ...f, layout: l.value, ...defaults }));
+                  }}
+                  className={`rounded-lg border p-3 text-left transition-colors ${form.layout === l.value ? 'border-blue-500 bg-blue-600/10' : 'border-gray-700 hover:border-gray-500'}`}
+                >
+                  <p className={`text-sm font-semibold mb-1 ${form.layout === l.value ? 'text-blue-400' : 'text-white'}`}>{l.label}</p>
+                  <p className="text-xs text-gray-500 leading-tight">{l.desc}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Les couleurs peuvent être ajustées ci-dessous.</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-300">Couleur principale</label>
