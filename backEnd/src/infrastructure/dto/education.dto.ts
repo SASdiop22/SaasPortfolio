@@ -3,9 +3,9 @@ import { z } from 'zod';
 export const CreateEducationDto = z.object({
   institution: z.string().min(1).max(255),
   degree: z.string().min(1).max(255),
-  field: z.string().max(255).optional(),
+  field: z.string().max(255).nullish(),
   startDate: z.string().date(),
-  endDate: z.string().date().optional(),
+  endDate: z.string().date().nullish(),
   displayOrder: z.number().int().min(0).optional(),
 });
 

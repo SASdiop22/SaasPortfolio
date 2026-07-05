@@ -3,9 +3,9 @@ import { z } from 'zod';
 export const CreateExperienceDto = z.object({
   company: z.string().min(1).max(255),
   role: z.string().min(1).max(255),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   startDate: z.string().date(),
-  endDate: z.string().date().optional(),
+  endDate: z.string().date().nullish(),
   displayOrder: z.number().int().min(0).optional(),
 });
 

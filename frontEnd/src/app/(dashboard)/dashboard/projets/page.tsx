@@ -57,12 +57,15 @@ export default function ProjetsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) { setFormError('Le titre est requis.'); return; }
+    const techStack = form.techStack
+      ? form.techStack.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
     const payload = {
       title: form.title.trim(),
-      description: form.description || null,
-      techStack: form.techStack ? form.techStack.split(',').map((s) => s.trim()).filter(Boolean) : [],
-      liveUrl: form.liveUrl || null,
-      githubUrl: form.githubUrl || null,
+      ...(form.description.trim() && { description: form.description.trim() }),
+      ...(techStack.length > 0 && { techStack }),
+      ...(form.liveUrl.trim() && { liveUrl: form.liveUrl.trim() }),
+      ...(form.githubUrl.trim() && { githubUrl: form.githubUrl.trim() }),
     };
     try {
       if (modal === 'edit' && editing) {
@@ -107,7 +110,7 @@ export default function ProjetsPage() {
           </div>
           <FormField label="Technologies (séparées par des virgules)" type="text" value={form.techStack} onChange={(e) => setForm({ ...form, techStack: e.target.value })} placeholder="React, TypeScript, Node.js" />
           <FormField label="URL Live" type="url" value={form.liveUrl} onChange={(e) => setForm({ ...form, liveUrl: e.target.value })} placeholder="https://..." />
-          <FormField label="GitHub" type="url" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} placeholder="https://github.com/..." />
+          <FormField label="Dépôt (GitHub, GitLab…)" type="url" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} placeholder="https://github.com/..." />
           {formError && <p className="text-sm text-red-400">{formError}</p>}
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="rounded-md px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Annuler</button>

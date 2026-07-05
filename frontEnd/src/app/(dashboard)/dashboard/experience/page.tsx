@@ -63,9 +63,9 @@ export default function ExperiencePage() {
     const payload = {
       company: form.company.trim(),
       role: form.role.trim(),
-      description: form.description || null,
+      ...(form.description.trim() && { description: form.description.trim() }),
       startDate: form.startDate,
-      endDate: form.endDate || null,
+      ...(form.endDate && { endDate: form.endDate }),
     };
     try {
       if (modal === 'edit' && editing) {
@@ -108,7 +108,7 @@ export default function ExperiencePage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Date de début *" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
-            <FormField label="Date de fin" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
+            <FormField label="Date de fin (vide = en cours)" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
           </div>
           {formError && <p className="text-sm text-red-400">{formError}</p>}
           <div className="flex justify-end gap-3 pt-2">

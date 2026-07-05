@@ -41,8 +41,8 @@ export default function CompetencesPage() {
     if (!form.name.trim()) { setFormError('Le nom est requis.'); return; }
     const payload = {
       name: form.name.trim(),
-      level: form.level || null,
-      category: form.category || null,
+      ...(form.level.trim() && { level: form.level.trim() }),
+      ...(form.category.trim() && { category: form.category.trim() }),
     };
     try {
       if (modal === 'edit' && editing) {

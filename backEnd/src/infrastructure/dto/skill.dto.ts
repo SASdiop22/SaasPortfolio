@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const CreateSkillDto = z.object({
   name: z.string().min(1).max(150),
-  level: z.string().max(100).optional(),
-  category: z.string().max(100).optional(),
+  level: z.string().max(100).nullish(),
+  category: z.string().max(100).nullish(),
   displayOrder: z.number().int().min(0).optional(),
 });
 

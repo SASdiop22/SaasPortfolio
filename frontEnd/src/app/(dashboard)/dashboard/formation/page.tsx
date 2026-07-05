@@ -64,9 +64,9 @@ export default function FormationPage() {
     const payload = {
       institution: form.institution.trim(),
       degree: form.degree.trim(),
-      field: form.field || null,
+      ...(form.field.trim() && { field: form.field.trim() }),
       startDate: form.startDate,
-      endDate: form.endDate || null,
+      ...(form.endDate && { endDate: form.endDate }),
     };
     try {
       if (modal === 'edit' && editing) {
@@ -106,7 +106,7 @@ export default function FormationPage() {
           <FormField label="Domaine" type="text" value={form.field} onChange={(e) => setForm({ ...form, field: e.target.value })} placeholder="Génie Logiciel" />
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Date de début *" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
-            <FormField label="Date de fin" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
+            <FormField label="Date de fin (vide = en cours)" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
           </div>
           {formError && <p className="text-sm text-red-400">{formError}</p>}
           <div className="flex justify-end gap-3 pt-2">
